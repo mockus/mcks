@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Canvas</title>
+
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div id="page-wrapper">
+		<h1>Racing game</h1>
+	
+		<canvas id="stage" width="1395" height="400"></canvas>
+		
+		<div class="controls">
+			<button type="button" id="startBtn">Acceleration</button>
+			<button type="button" id="stopBtn">Brake</button>
+			<button type="button" id="resetBtn">Play again</button>
+			<img src="car.png" id="car">
+		</div>
+	</div>
+	
+	<script src="raf-polyfill.js"></script>
+	<script src="script.js"></script>
+</body>
+</html>
