@@ -23,7 +23,7 @@ window.cancelRequestAnimFrame = ( function() {
 // Initialize canvas and required variables
 var canvas = document.getElementById("canvas"),
 		ctx = canvas.getContext("2d"), // Create canvas context
-		W = window.innerWidth, // Window's width
+		W = window.innerWidth-100, // Window's width
 		H = window.innerHeight, // Window's height
 		particles = [], // Array containing particles
 		ball = {}, // Ball object
@@ -40,11 +40,51 @@ var canvas = document.getElementById("canvas"),
 		over = 0, // flag varialbe, cahnged when the game is over
 		init, // variable to initialize animation
 		paddleHit;
+		inc=10; // increment of paddles
+		key1up=false;
+		key1down=false;
+		key2up=false;
+		key2down=false;
 
 // Add mousemove and mousedown events to the canvas
-canvas.addEventListener("mousemove", trackPosition, true);
+//canvas.addEventListener("mousemove", trackPosition, true);
 canvas.addEventListener("mousedown", btnClick, true);
 
+function handleDown(e) {
+		switch(e.keyCode) {
+		case 81:
+			key2up=true;
+		break;
+		case 87:
+			key2down=true;
+		break;
+		case 79:
+			key1up=true;
+		break;
+		case 80:
+			key1down=true;
+		break;
+		}
+}
+function handleUp(e) {
+		switch(e.keyCode) {
+		case 81:
+			key2up=false;
+		break;
+		case 87:
+			key2down=false;
+		break;
+		case 79:
+			key1up=false;
+		break;
+		case 80:
+			key1down=false;
+		break;
+		}
+}
+
+window.addEventListener('keydown', handleDown, true);
+window.addEventListener('keyup', handleUp, true);
 // Initialise the collision sound
 collision = document.getElementById("collide");
 
@@ -61,12 +101,12 @@ function paintCanvas() {
 // Function for creating paddles
 function Paddle(pos) {
 	// Height and width
-	this.h = 5;
-	this.w = 150;
+	this.w = 5;
+	this.h = 150;
 	
 	// Paddle's position
-	this.x = W/2 - this.w/2;
-	this.y = (pos == "top") ? 0 : H - this.h;
+	this.y = H/2 - this.h/2;
+	this.x = (pos == "top") ? 50 : W - this.w-50;
 	
 }
 
@@ -76,11 +116,11 @@ paddles.push(new Paddle("top"));
 
 // Ball object
 ball = {
-	x: 50,
-	y: 50, 
+	x: W/2,
+	y: H/2+50, 
 	r: 5,
 	c: "white",
-	vx: 4,
+	vx: 8,
 	vy: 8,
 	
 	// Function for drawing ball on canvas
@@ -177,25 +217,30 @@ function trackPosition(e) {
 // Function to update positions, score and everything.
 // Basically, the main game logic is defined here
 function update() {
-	
 	// Update scores
 	updateScore(); 
 	
 	// Move the paddles on mouse move
-	if(mouse.x && mouse.y) {
+	/*if(mouse.x && mouse.y) {
 		for(var i = 1; i < paddles.length; i++) {
 			p = paddles[i];
-			p.x = mouse.x - p.w/2;
+			p.y = mouse.y - p.h/2;
 		}		
-	}
+	}*/
+	p1 = paddles[1];
+	p2 = paddles[2];
+	
+	if(key1up) p1.y+=inc;
+	else if(key1down) p1.y-=inc;
+	if(key2up) p2.y+=inc;
+	else if(key2down) p2.y-=inc;
 	
 	// Move the ball
 	ball.x += ball.vx;
 	ball.y += ball.vy;
 	
 	// Collision with paddles
-	p1 = paddles[1];
-	p2 = paddles[2];
+	
 	
 	// If the ball strikes with paddles,
 	// invert the y-velocity vector of ball,
@@ -216,25 +261,29 @@ function update() {
 		// Collide with walls, If the ball hits the top/bottom,
 		// walls, run gameOver() function
 		if(ball.y + ball.r > H) {
+			ball.vy = -ball.vy;
 			ball.y = H - ball.r;
-			gameOver();
+			//gameOver();
 		} 
 		
 		else if(ball.y < 0) {
+			ball.vy = -ball.vy;
 			ball.y = ball.r;
-			gameOver();
+			//gameOver();
 		}
 		
 		// If ball strikes the vertical walls, invert the 
 		// x-velocity vector of ball
 		if(ball.x + ball.r > W) {
-			ball.vx = -ball.vx;
+			//ball.vx = -ball.vx;
 			ball.x = W - ball.r;
+			gameOver();
 		}
 		
 		else if(ball.x -ball.r < 0) {
-			ball.vx = -ball.vx;
+			//ball.vx = -ball.vx;
 			ball.x = ball.r;
+			gameOver();
 		}
 	}
 	
@@ -274,17 +323,17 @@ function collides(b, p) {
 
 //Do this when collides == true
 function collideAction(ball, p) {
-	ball.vy = -ball.vy;
+	ball.vx = -ball.vx;
 	
 	if(paddleHit == 1) {
-		ball.y = p.y - p.h;
-		particlePos.y = ball.y + ball.r;
+		ball.x = p.x - p.w;
+		particlePos.x = ball.x + ball.r;
 		multiplier = -1;	
 	}
 	
 	else if(paddleHit == 2) {
-		ball.y = p.h + ball.r;
-		particlePos.y = ball.y - ball.r;
+		ball.x = p.w - ball.r;
+		particlePos.x = ball.x - ball.r;
 		multiplier = 1;	
 	}
 	
@@ -299,7 +348,7 @@ function collideAction(ball, p) {
 		collision.play();
 	}
 	
-	particlePos.x = ball.x;
+	particlePos.y = ball.y;
 	flag = 1;
 }
 
@@ -381,8 +430,8 @@ function btnClick(e) {
 	// If the game is over, and the restart button is clicked
 	if(over == 1) {
 		if(mx >= restartBtn.x && mx <= restartBtn.x + restartBtn.w) {
-			ball.x = 20;
-			ball.y = 20;
+			ball.x = W/2;
+			ball.y = H/2+50;
 			points = 0;
 			ball.vx = 4;
 			ball.vy = 8;
@@ -390,8 +439,9 @@ function btnClick(e) {
 			
 			over = 0;
 		}
-	}
+	}	
 }
+
 
 // Show the start screen
 startScreen();
