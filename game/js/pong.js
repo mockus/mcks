@@ -120,7 +120,7 @@ ball = {
 	y: H/2+50, 
 	r: 5,
 	c: "white",
-	vx: 8,
+	vx: 4,
 	vy: 8,
 	
 	// Function for drawing ball on canvas
